@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Backup de Imagen a Google Drive</title>
+</head>
+<body>
+  <h2>Authentication and Image Sending</h2>
+
+  <button id="auth-button">Autenticarse con Google</button>
+  <br><br>
+
+  <input type="file" id="image-input" accept="image/*" />
+  <br><br>
+
+  <button id="send-button" disabled>Send Image</button>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    let accessToken = '';
+    let userEmail = '';
+
+    document.getElementById('auth-button').addEventListener('click', () => {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: '897076990254-6mt9uol5sj3jqug148cbk956j4tkgin0.apps.googleusercontent.com',
+        scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
+        callback: (tokenResponse) => {
+          accessToken = tokenResponse.access_token;
+          document.getElementById('send-button').disabled = false;
+
+          fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+            headers: { Authorization: 'Bearer ' + accessToken }
+          })
+          .then(res => res.json())
+          .then(data => {
+            userEmail = data.email;
+            alert('Autenticado como: ' + userEmail);
+          });
+        },
+      });
+      client.requestAccessToken();
+    });
+
+    document.getElementById('send-button').addEventListener('click', () => {
+      const fileInput = document.getElementById('image-input');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Selecciona una imagen.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        const base64Image = reader.result.split(',')[1]; // Quita el encabezado
+
+        const payload = {
+          image_name: file.name,
+          image: base64Image,
+          user_id: userEmail,
+          google_drive_token: accessToken
+        };
+
+        fetch('https://us-central1-enhanced-oxygen-466519-g9.cloudfunctions.net/store_image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.text())
+        .then(msg => alert('Respuesta: ' + msg))
+        .catch(err => alert('Error: ' + err));
+      };
+
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
