@@ -109,3 +109,59 @@ Edit `frontend_google_drive_backup.html`:
 Developed by request for Google Cloud Function integration in Python.
 
 Desarrollado por solicitud para una integración de Google Cloud Function en Python.
+
+
+--------------------------------------------------------------------------------------------------------
+# Google Drive Image Backup with Cloud Functions
+
+This project enables users to authenticate with Google, upload an image via a frontend,
+store the request in Cloud Storage, and process it via Cloud Functions to upload it to Google Drive.
+
+## Setup Steps
+
+### 1. Enable APIs
+```bash
+gcloud services enable drive.googleapis.com
+gcloud services enable storage.googleapis.com
+```
+
+### 2. Create Cloud Storage Bucket
+```bash
+gsutil mb gs://backup-images-vancouver
+```
+
+### 3. OAuth 2.0 Credentials
+Create OAuth 2.0 client ID (Web type) in Google Cloud Console and allow JS origin (e.g., http://localhost).
+
+### 4. Deploy `store_image` Function
+```bash
+gcloud functions deploy store_image \
+  --runtime python310 \
+  --trigger-http \
+  --allow-unauthenticated \
+  --entry-point store_image \
+  --source store_image_function
+```
+
+### 5. Deploy `process_requests` Function
+```bash
+gcloud functions deploy process_requests \
+  --runtime python310 \
+  --trigger-http \
+  --entry-point process_requests \
+  --source process_requests_function \
+  --allow-unauthenticated
+```
+Trigger manually:
+```bash
+curl -X POST -d '' https://REGION-PROJECT_ID.cloudfunctions.net/process_requests
+```
+
+### 6. Frontend HTML Sample
+Include Google OAuth JS client and use `fetch` to send payload to Cloud Function.
+
+### 7. Verify
+```bash
+gcloud functions logs read process_requests --limit=10
+gsutil cat gs://backup-images-vancouver/requests.json
+```
