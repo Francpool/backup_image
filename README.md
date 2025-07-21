@@ -82,7 +82,7 @@ gcloud scheduler jobs create http trigger-process-requests \
 ## 🌐 Frontend
 
 Edit `frontend_google_drive_backup.html`:
-- Replace `YOUR_GOOGLE_CLIENT_ID`
+- Replace `YOUR_GOOGLE_CLIENT_ID_auth`
 - Replace `https://REGION-PROJECT.cloudfunctions.net/store_image`
 
 ---

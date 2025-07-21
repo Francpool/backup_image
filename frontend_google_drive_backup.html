@@ -6,7 +6,7 @@
 <body>
   <h2>Authentication and Image Sending</h2>
 
-  <button id="auth-button">Autenticarse con Google</button>
+  <button id="auth-button">Authenticate with Google</button>
   <br><br>
 
   <input type="file" id="image-input" accept="image/*" />
@@ -25,7 +25,7 @@
         scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
         callback: (tokenResponse) => {
           accessToken = tokenResponse.access_token;
-          console.log('✅ Token recibido:', accessToken);
+          console.log('✅ token received:', accessToken);
 
           document.getElementById('send-button').disabled = false;
 
@@ -35,8 +35,8 @@
           .then(res => res.json())
           .then(data => {
             userEmail = data.email;
-            console.log('📧 Usuario autenticado:', userEmail);
-            alert('Autenticado como: ' + userEmail);
+            console.log('📧 autenticated user:', userEmail);
+            alert('autenticated as: ' + userEmail);
           });
         },
       });
@@ -48,7 +48,7 @@
       const file = fileInput.files[0];
 
       if (!file) {
-        alert('Selecciona una imagen.');
+        alert('choose an image first.');
         return;
       }
 
